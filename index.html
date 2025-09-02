@@ -569,5 +569,14 @@
       render();
     })();
   </script>
+  <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js")
+        .then(() => console.log("✅ Service Worker registrado"))
+        .catch((err) => console.error("❌ Error en SW:", err));
+    });
+  }
+</script>
 </body>
 </html>
