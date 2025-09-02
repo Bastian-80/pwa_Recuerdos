@@ -1,0 +1,17 @@
+{
+  "name": "Cápsulas de Recuerdos",
+  "short_name": "Recuerdos",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0ea5e9",
+  "description": "Guarda lugares y momentos como cápsulas para recordarlos y volver a ellos.",
+  "icons": [
+    {
+      "src": "https://3.bp.blogspot.com/-_zFvRcnr67s/WlOWBe4YXDI/AAAAAAAAA3U/uTOggzlg8AEGIuBT81w7BXHP6mU_fEc6wCLcBGAs/s1600/memoria.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
