@@ -1,582 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cápsulas de Recuerdos — PWA</title>
-  <meta name="theme-color" content="#0ea5e9" />
-  <link rel="manifest" id="dynamic-manifest" href="data:application/json,{ }">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cápsulas de Recuerdos</title>
+
+  <!-- 📌 Aquí llamamos al manifest real con tu foto -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Color de la barra en móviles -->
+  <meta name="theme-color" content="#0ea5e9">
+
+  <!-- Ícono para Safari / iOS -->
+  <link rel="apple-touch-icon" href="https://3.bp.blogspot.com/-_zFvRcnr67s/WlOWBe4YXDI/AAAAAAAAA3U/uTOggzlg8AEGIuBT81w7BXHP6mU_fEc6wCLcBGAs/s1600/memoria.jpeg">
+
   <style>
-    :root{
-      --bg:#0b1220; /* fondo base */
-      --panel:#0f172a; /* panel oscuro */
-      --muted:#94a3b8; /* texto tenue */
-      --text:#e2e8f0; /* texto principal */
-      --brand:#0ea5e9; /* cian */
-      --brand-2:#22d3ee; /* cian claro */
-      --ok:#10b981; /* verde */
-      --warn:#f59e0b; /* ámbar */
-      --danger:#ef4444; /* rojo */
-      --radius:16px;
-      --shadow:0 10px 30px rgba(2,6,23,.45);
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0b1220;
+      color: #f0f0f0;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",sans-serif;
-      background: radial-gradient(1200px 800px at 10% -10%, rgba(34,211,238,.15), transparent 60%),
-                  radial-gradient(900px 700px at 110% 10%, rgba(14,165,233,.15), transparent 50%),
-                  var(--bg);
-      color:var(--text);
-      display:flex; flex-direction:column;
+    header {
+      background: #0ea5e9;
+      color: white;
+      padding: 1rem;
+      text-align: center;
     }
-    header{
-      position:sticky; top:0; z-index:5;
-      backdrop-filter:saturate(140%) blur(10px);
-      background:linear-gradient(180deg, rgba(2,6,23,.8), rgba(2,6,23,.4));
-      border-bottom:1px solid rgba(148,163,184,.15);
+    .capsule-list {
+      padding: 1rem;
     }
-    .wrap{max-width:1100px; margin:0 auto; padding:14px 16px;}
-    .bar{display:flex; gap:10px; align-items:center; justify-content:space-between}
-    .brand{display:flex; align-items:center; gap:12px}
-    .logo{width:40px; height:40px; border-radius:12px; background:conic-gradient(from 180deg, var(--brand), var(--brand-2)); box-shadow:var(--shadow)}
-    .title{font-size:18px; font-weight:700; letter-spacing:.3px}
-    .controls{display:flex; gap:10px; flex-wrap:wrap}
-    button,.btn{
-      background:linear-gradient(180deg, rgba(34,211,238,.25), rgba(14,165,233,.35));
-      color:white; border:1px solid rgba(148,163,184,.25); border-radius:12px;
-      padding:10px 14px; font-weight:600; cursor:pointer; box-shadow:var(--shadow);
-      transition:transform .1s ease, filter .2s ease, background .2s ease;
+    .capsule {
+      background: #1c2541;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 10px;
     }
-    button:hover{transform:translateY(-1px)}
-    .btn-secondary{background:rgba(148,163,184,.12)}
-    .btn-danger{background:rgba(239,68,68,.18); border-color:rgba(239,68,68,.35)}
-    input, textarea, select{
-      width:100%; background:#0a1020; color:var(--text); border:1px solid rgba(148,163,184,.25);
-      padding:10px 12px; border-radius:12px; outline:none;
+    .capsule h2 {
+      margin: 0;
+      color: #0ea5e9;
     }
-    main{flex:1}
-    .grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); padding:20px}
-    .card{background:var(--panel); border:1px solid rgba(148,163,184,.15); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px}
-    .capsule-head{display:flex; align-items:center; justify-content:space-between; gap:10px}
-    .capsule-title{font-weight:800; font-size:16px; line-height:1.1}
-    .capsule-sub{color:var(--muted); font-size:12px}
-    .tag{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#d1fae5; background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.4); padding:4px 10px; border-radius:999px}
-    .row{display:flex; gap:10px; align-items:center}
-    .grow{flex:1}
-    .empty{opacity:.75; text-align:center; padding:48px 16px}
-    .pill-input{display:flex; gap:8px; flex-wrap:wrap}
-    .search{flex:1}
-    .footer{padding:24px 16px; text-align:center; color:var(--muted)}
-    .small{font-size:12px; color:var(--muted)}
-    dialog{border:none; border-radius:20px; padding:0; width:min(680px, 96vw); background:transparent}
-    .modal{background:var(--panel); border:1px solid rgba(148,163,184,.18); border-radius:20px; overflow:hidden; box-shadow:var(--shadow)}
-    .modal-head{display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid rgba(148,163,184,.12)}
-    .modal-body{padding:16px 18px; display:grid; gap:12px}
-    .modal-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    .modal-foot{display:flex; justify-content:flex-end; gap:10px; padding:16px 18px; border-top:1px solid rgba(148,163,184,.12)}
-    @media (max-width:720px){ .modal-grid{grid-template-columns:1fr} }
-    .capsule-actions{display:flex; gap:8px; flex-wrap:wrap}
-    .map-pin{font-size:12px; color:#bae6fd}
-    .install-hint{display:none}
-    .installable .install-hint{display:inline-flex}
-    .danger-text{color:#fecaca}
+    .capsule p {
+      margin: 0.5rem 0;
+    }
+    button {
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0284c7;
+    }
   </style>
 </head>
 <body>
   <header>
-    <div class="wrap bar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <div class="title">Cápsulas de Recuerdos</div>
-          <div class="small">Guarda lugares y momentos para volver a ellos</div>
-        </div>
-      </div>
-      <div class="controls">
-        <div class="pill-input search row">
-          <input id="search" class="grow" placeholder="Buscar por título, nombre o nota…" />
-          <select id="sort">
-            <option value="new">Más recientes</option>
-            <option value="old">Más antiguas</option>
-            <option value="az">A → Z (título)</option>
-            <option value="za">Z → A (título)</option>
-          </select>
-        </div>
-        <button id="addBtn">Nueva cápsula</button>
-        <button id="installBtn" class="btn-secondary install-hint">Instalar</button>
-        <button id="exportBtn" class="btn-secondary">Exportar</button>
-        <label class="btn btn-secondary" for="importFile">Importar</label>
-        <input type="file" id="importFile" accept="application/json" hidden />
-      </div>
-    </div>
+    <h1>Cápsulas de Recuerdos</h1>
+    <button onclick="createCapsule()">Nueva cápsula</button>
   </header>
-
-  <main>
-    <div id="capsules" class="grid" aria-live="polite"></div>
-    <div id="empty" class="empty" hidden>
-      <p>👋 Aún no hay cápsulas. Crea tu primera con “Nueva cápsula”.</p>
-      <p class="small">Funciona sin conexión y puedes instalarla como app.</p>
-    </div>
-  </main>
-
-  <footer class="footer">
-    <div class="small">Hecho como PWA de ejemplo · Privado: todo se guarda en tu dispositivo</div>
-  </footer>
-
-  <!-- Modal Nueva/Editar -->
-  <dialog id="capsuleDialog">
-    <div class="modal">
-      <div class="modal-head">
-        <strong id="dialogTitle">Nueva cápsula</strong>
-        <button id="closeDialog" class="btn-secondary">Cerrar</button>
-      </div>
-      <form id="capsuleForm" class="modal-body">
-        <div class="modal-grid">
-          <div>
-            <label>Título</label>
-            <input id="titleInput" required maxlength="80" placeholder="Ej: Heladería de la esquina" />
-          </div>
-          <div>
-            <label>Nombre de cápsula</label>
-            <input id="nameInput" required maxlength="40" placeholder="Ej: Dulce momento" />
-          </div>
-        </div>
-        <div>
-          <label>Nota (opcional)</label>
-          <textarea id="noteInput" rows="3" maxlength="500" placeholder="¿Qué hace especial este lugar o momento?"></textarea>
-        </div>
-        <div class="row">
-          <button type="button" id="locBtn" class="btn-secondary">📍 Tomar ubicación</button>
-          <div id="locInfo" class="map-pin"></div>
-        </div>
-        <div class="row">
-          <label class="btn btn-secondary" for="photoInput">Adjuntar foto (opcional)</label>
-          <input id="photoInput" type="file" accept="image/*" capture="environment" hidden />
-          <div id="photoInfo" class="small"></div>
-        </div>
-        <div class="modal-foot">
-          <button type="button" id="deleteBtn" class="btn btn-danger" hidden>Eliminar</button>
-          <div class="grow"></div>
-          <button type="submit">Guardar</button>
-        </div>
-      </form>
-    </div>
-  </dialog>
-
-  <template id="cardTpl">
-    <article class="card">
-      <div class="capsule-head">
-        <div>
-          <div class="capsule-title"></div>
-          <div class="capsule-sub"></div>
-        </div>
-        <div class="tag">Cápsula</div>
-      </div>
-      <img class="capsule-photo" alt="Foto de la cápsula" style="display:none; width:100%; border-radius:12px; border:1px solid rgba(148,163,184,.2)" />
-      <div class="capsule-note"></div>
-      <div class="small map-pin"></div>
-      <div class="capsule-actions">
-        <button class="btn-secondary openMapBtn">Abrir mapa</button>
-        <button class="btn-secondary editBtn">Editar</button>
-        <button class="btn-danger delBtn">Eliminar</button>
-      </div>
-    </article>
-  </template>
+  <section class="capsule-list" id="capsuleList">
+    <!-- Aquí se insertan las cápsulas -->
+  </section>
 
   <script>
-    /**********************
-     * Utilidades rápidas *
-     **********************/
-    const $ = (q, el=document) => el.querySelector(q);
-    const $$ = (q, el=document) => [...el.querySelectorAll(q)];
-    const storeKey = 'memory_capsules_v1';
-    const readCaps = () => JSON.parse(localStorage.getItem(storeKey) || '[]');
-    const writeCaps = (arr) => localStorage.setItem(storeKey, JSON.stringify(arr));
-    const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const capsuleList = document.getElementById("capsuleList");
 
-    function formatDate(ts){
-      const d = new Date(ts);
-      return d.toLocaleString(undefined, { dateStyle:'medium', timeStyle:'short' });
-    }
-
-    function humanLoc(lat, lng){
-      if(lat==null||lng==null) return 'Sin ubicación';
-      return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    }
-
-    /*******************
-     * Estado/UI lista *
-     *******************/
-    const state = {
-      editingId: null,
-      installEvent: null,
-      iconsReady: false,
-    };
-
-    const els = {
-      grid: $('#capsules'),
-      empty: $('#empty'),
-      search: $('#search'),
-      sort: $('#sort'),
-      addBtn: $('#addBtn'),
-      installBtn: $('#installBtn'),
-      exportBtn: $('#exportBtn'),
-      importFile: $('#importFile'),
-      dialog: $('#capsuleDialog'),
-      form: $('#capsuleForm'),
-      dialogTitle: $('#dialogTitle'),
-      closeDialog: $('#closeDialog'),
-      titleInput: $('#titleInput'),
-      nameInput: $('#nameInput'),
-      noteInput: $('#noteInput'),
-      locBtn: $('#locBtn'),
-      locInfo: $('#locInfo'),
-      deleteBtn: $('#deleteBtn'),
-      photoInput: $('#photoInput'),
-      photoInfo: $('#photoInfo'),
-    };
-
-    function render(){
-      const q = els.search.value.trim().toLowerCase();
-      let items = readCaps();
-      const sort = els.sort.value;
-      if(q){
-        items = items.filter(x => (
-          x.title.toLowerCase().includes(q) ||
-          x.name.toLowerCase().includes(q) ||
-          (x.note||'').toLowerCase().includes(q)
-        ));
-      }
-      items.sort((a,b)=>{
-        if(sort==='new') return b.createdAt - a.createdAt;
-        if(sort==='old') return a.createdAt - b.createdAt;
-        if(sort==='az') return a.title.localeCompare(b.title);
-        if(sort==='za') return b.title.localeCompare(a.title);
-        return 0;
-      });
-
-      els.grid.innerHTML = '';
-      if(items.length===0){ els.empty.hidden = false; return; }
-      els.empty.hidden = true;
-
-      for(const x of items){
-        const card = document.importNode($('#cardTpl').content, true);
-        $('.capsule-title', card).textContent = x.title;
-        $('.capsule-sub', card).textContent = `${x.name} · ${formatDate(x.createdAt)}`;
-        $('.capsule-note', card).textContent = x.note || '';
-        const photo = $('.capsule-photo', card);
-        if(x.photo){ photo.src = x.photo; photo.style.display = 'block'; }
-        $('.map-pin', card).textContent = x.lat!=null? `📍 ${humanLoc(x.lat,x.lng)}` : '📍 Sin ubicación';
-
-        $('.openMapBtn', card).addEventListener('click', ()=>{
-          if(x.lat!=null){
-            const url = `https://maps.google.com/?q=${x.lat},${x.lng}`;
-            window.open(url, '_blank');
-          }else{
-            alert('Esta cápsula no tiene ubicación guardada.');
-          }
-        });
-        $('.editBtn', card).addEventListener('click', ()=> openEditor(x.id));
-        $('.delBtn', card).addEventListener('click', ()=> deleteCapsule(x.id));
-
-        els.grid.appendChild(card);
-      }
-    }
-
-    function openEditor(id=null){
-      state.editingId = id;
-      if(id){
-        const x = readCaps().find(c=>c.id===id);
-        if(!x) return;
-        els.dialogTitle.textContent = 'Editar cápsula';
-        els.titleInput.value = x.title;
-        els.nameInput.value = x.name;
-        els.noteInput.value = x.note || '';
-        els.locInfo.textContent = x.lat!=null? `📍 ${humanLoc(x.lat,x.lng)}` : '';
-        els.deleteBtn.hidden = false;
-      }else{
-        els.dialogTitle.textContent = 'Nueva cápsula';
-        els.form.reset();
-        els.locInfo.textContent = '';
-        els.photoInfo.textContent='';
-        els.deleteBtn.hidden = true;
-      }
-      els.dialog.showModal();
-    }
-
-    function deleteCapsule(id){
-      if(!confirm('¿Eliminar esta cápsula? Esta acción no se puede deshacer.')) return;
-      const items = readCaps().filter(x=>x.id!==id);
-      writeCaps(items);
-      render();
-    }
-
-    /**********************
-     * Geolocalización    *
-     **********************/
-    async function getLocation(){
-      els.locInfo.textContent = 'Obteniendo ubicación…';
-      return new Promise((resolve)=>{
-        if(!('geolocation' in navigator)){
-          els.locInfo.textContent = 'Geolocalización no disponible en este dispositivo';
-          return resolve(null);
-        }
-        navigator.geolocation.getCurrentPosition((pos)=>{
-          const { latitude:lat, longitude:lng, accuracy } = pos.coords;
-          els.locInfo.textContent = `📍 ${humanLoc(lat,lng)} · ±${Math.round(accuracy)}m`;
-          resolve({lat,lng,accuracy});
-        },(err)=>{
-          console.warn(err);
-          els.locInfo.textContent = 'No se pudo obtener la ubicación';
-          resolve(null);
-        }, { enableHighAccuracy:true, timeout:12000, maximumAge:0 });
-      });
-    }
-
-    /**********************
-     * Crear/Editar guard *
-     **********************/
-    els.form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const title = els.titleInput.value.trim();
-      const name = els.nameInput.value.trim();
-      const note = els.noteInput.value.trim();
-
-      // Cargar foto si se eligió
-      let photoDataUrl = null;
-      if(els.photoInput.files && els.photoInput.files[0]){
-        const file = els.photoInput.files[0];
-        const img = await fileToDataURL(file, 1280, 1280); // reducir tamaño
-        photoDataUrl = img;
-      }
-
-      const items = readCaps();
-      if(state.editingId){
-        const idx = items.findIndex(x=>x.id===state.editingId);
-        if(idx!==-1){
-          const prev = items[idx];
-          items[idx] = { ...prev, title, name, note, photo: photoDataUrl || prev.photo };
-        }
-      }else{
-        items.unshift({
-          id: uid(), title, name, note,
-          createdAt: Date.now(),
-          lat: lastLoc?.lat ?? null,
-          lng: lastLoc?.lng ?? null,
-          accuracy: lastLoc?.accuracy ?? null,
-          photo: photoDataUrl,
-        });
-      }
-      writeCaps(items);
-      els.dialog.close();
-      render();
-    });
-
-    $('#closeDialog').addEventListener('click', ()=> els.dialog.close());
-    $('#addBtn').addEventListener('click', ()=> openEditor(null));
-    $('#deleteBtn').addEventListener('click', ()=>{
-      if(state.editingId){ deleteCapsule(state.editingId); els.dialog.close(); }
-    });
-
-    let lastLoc = null;
-    $('#locBtn').addEventListener('click', async ()=>{ lastLoc = await getLocation(); });
-
-    els.search.addEventListener('input', render);
-    els.sort.addEventListener('change', render);
-
-    /**********************
-     * Exportar / Importar*
-     **********************/
-    $('#exportBtn').addEventListener('click', ()=>{
-      const data = JSON.stringify(readCaps(), null, 2);
-      const blob = new Blob([data], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `capsulas_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    $('#importFile').addEventListener('change', async (e)=>{
-      const file = e.target.files[0];
-      if(!file) return;
-      try{
-        const text = await file.text();
-        const arr = JSON.parse(text);
-        if(!Array.isArray(arr)) throw new Error('Formato inválido');
-        writeCaps(arr);
-        render();
-        alert('Importación completa');
-      }catch(err){
-        alert('No se pudo importar: '+ err.message);
-      }finally{
-        e.target.value = '';
-      }
-    });
-
-    /**********************
-     * Foto -> dataURL     *
-     **********************/
-    function fileToDataURL(file, maxW=1280, maxH=1280){
-      return new Promise((resolve, reject)=>{
-        const reader = new FileReader();
-        reader.onload = ()=>{
-          const img = new Image();
-          img.onload = ()=>{
-            let {width:w, height:h} = img;
-            const scale = Math.min(1, maxW/w, maxH/h);
-            const canvas = document.createElement('canvas');
-            canvas.width = Math.round(w*scale);
-            canvas.height = Math.round(h*scale);
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', .85));
-          };
-          img.onerror = reject;
-          img.src = reader.result;
+    function createCapsule() {
+      const title = prompt("Título de la cápsula:");
+      const description = prompt("Descripción del recuerdo:");
+      if (title && description) {
+        const capsule = {
+          title,
+          description,
+          date: new Date().toLocaleDateString()
         };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    /**********************
-     * Manifest dinámico   *
-     **********************/
-    async function generateIcons(){
-      // Crea 2 PNGs (192 y 512) en runtime para usarlas en el manifest
-      const sizes = [192, 512];
-      const out = [];
-      for(const s of sizes){
-        const c = document.createElement('canvas'); c.width = c.height = s;
-        const g = c.getContext('2d');
-        // fondo degradado
-        const grad = g.createLinearGradient(0,0,s,s);
-        grad.addColorStop(0,'#22d3ee');
-        grad.addColorStop(1,'#0ea5e9');
-        g.fillStyle = grad; g.fillRect(0,0,s,s);
-        // marca
-        g.fillStyle = 'rgba(255,255,255,.9)';
-        g.beginPath();
-        g.arc(s*0.5, s*0.5, s*0.26, 0, Math.PI*2);
-        g.fill();
-        g.fillStyle = '#0b1220';
-        g.font = `${Math.round(s*0.16)}px system-ui, Segoe UI, Roboto`;
-        g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText('CR', s*0.5, s*0.5);
-        const blob = await new Promise(r=> c.toBlob(b=>r(b), 'image/png'));
-        const url = URL.createObjectURL(blob);
-        out.push({ src:url, sizes:`${s}x${s}`, type:'image/png', purpose:'any maskable' });
+        saveCapsule(capsule);
+        renderCapsule(capsule);
       }
-      state.iconsReady = true;
-      return out;
     }
 
-    async function setupManifest(){
-      const icons = await generateIcons();
-      const manifest = {
-        name: 'Cápsulas de Recuerdos',
-        short_name: 'Recuerdos',
-        start_url: '.',
-        display: 'standalone',
-        background_color: '#0b1220',
-        theme_color: '#0ea5e9',
-        description: 'Guarda lugares y momentos como cápsulas para recordarlos y volver a ellos.',
-        icons,
-      };
-      const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const link = document.getElementById('dynamic-manifest');
-      link.href = url;
+    function saveCapsule(capsule) {
+      const capsules = JSON.parse(localStorage.getItem("capsules")) || [];
+      capsules.push(capsule);
+      localStorage.setItem("capsules", JSON.stringify(capsules));
     }
 
-    /**********************
-     * Instalar como app   *
-     **********************/
-    window.addEventListener('beforeinstallprompt', (e)=>{
-      e.preventDefault();
-      state.installEvent = e;
-      document.body.classList.add('installable');
-    });
-    $('#installBtn').addEventListener('click', async ()=>{
-      if(!state.installEvent) return;
-      state.installEvent.prompt();
-      await state.installEvent.userChoice;
-      state.installEvent = null;
-      document.body.classList.remove('installable');
-    });
+    function loadCapsules() {
+      const capsules = JSON.parse(localStorage.getItem("capsules")) || [];
+      capsules.forEach(renderCapsule);
+    }
 
-    /**********************
-     * Service Worker SW   *
-     **********************/
-    async function registerSW(){
-      if(!('serviceWorker' in navigator)) return;
-      const swCode = `
-        const CACHE = 'capsules-cache-v1';
-        self.addEventListener('install', (e)=>{
-          e.waitUntil((async()=>{
-            const scope = self.registration.scope; // base URL de la app
-            const root = new URL(scope);
-            const toCache = [root.href];
-            const cache = await caches.open(CACHE);
-            await cache.addAll(toCache);
-            self.skipWaiting();
-          })());
-        });
-        self.addEventListener('activate', (e)=>{
-          e.waitUntil((async()=>{
-            const keys = await caches.keys();
-            await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
-            self.clients.claim();
-          })());
-        });
-        self.addEventListener('fetch', (e)=>{
-          const req = e.request;
-          if(req.method !== 'GET') return;
-          e.respondWith((async()=>{
-            const cache = await caches.open(CACHE);
-            const cached = await cache.match(req);
-            if(cached) return cached;
-            try{
-              const net = await fetch(req);
-              if(new URL(req.url).origin === location.origin){
-                cache.put(req, net.clone());
-              }
-              return net;
-            }catch(err){
-              return cached || Response.error();
-            }
-          })());
-        });
+    function renderCapsule(capsule) {
+      const div = document.createElement("div");
+      div.className = "capsule";
+      div.innerHTML = `
+        <h2>${capsule.title}</h2>
+        <p>${capsule.description}</p>
+        <small>${capsule.date}</small>
       `;
-      const blob = new Blob([swCode], {type:'text/javascript'});
-      const swUrl = URL.createObjectURL(blob);
-      try{
-        await navigator.serviceWorker.register(swUrl);
-      }catch(err){
-        console.warn('SW fail', err);
-      }
+      capsuleList.appendChild(div);
     }
 
-    /**********************
-     * Start-up            *
-     **********************/
-    (async function init(){
-      await setupManifest();
-      await registerSW();
-      render();
-    })();
+    // Inicia cargando las cápsulas guardadas
+    loadCapsules();
   </script>
-  <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js")
-        .then(() => console.log("✅ Service Worker registrado"))
-        .catch((err) => console.error("❌ Error en SW:", err));
-    });
-  }
-</script>
 </body>
 </html>
